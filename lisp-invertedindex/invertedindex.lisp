@@ -6,15 +6,15 @@
   ((table :accessor table :initform (make-hash-table :test 'equal))
    (files-parsed :accessor files-parsed :initform nil)))
 
-(defun search-word (word)
-  (gethash word (table *MAP*) nil))
-
 (defclass occurrence ()
   ((filename :accessor filename :initarg :filename)
    (line :accessor line :initarg :line)
    (column :accessor column :initarg :column)))
 
 (defparameter *MAP* (make-instance 'invertedindex))
+
+(defun search-word (word)
+  (gethash word (table *MAP*) nil))
 
 (defun add-file (filename)
   (when (member filename (files-parsed *MAP*) :test-not #'string=)
