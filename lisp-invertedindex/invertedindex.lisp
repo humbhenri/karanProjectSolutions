@@ -6,7 +6,7 @@
   ((table :accessor table :initform (make-hash-table :test 'equal))
    (files-parsed :accessor files-parsed :initform nil)))
 
-(defmethod search-word (word)
+(defun search-word (word)
   (gethash word (table *MAP*) nil))
 
 (defclass occurrence ()
