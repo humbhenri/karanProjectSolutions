@@ -1,8 +1,8 @@
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
-
-struct Weather {}
+use std::net::TcpStream;
+use std::io::{Error, ErrorKind};
 
 fn get_api_key() -> Result<String, io::Error> {
     let mut f = try!(File::open("apikey"));
@@ -12,16 +12,18 @@ fn get_api_key() -> Result<String, io::Error> {
 }
 
 fn get_ip_address() -> Result<String, io::Error> {
-    
-}
-
-fn get_weather() -> Weather {
-    let end_point = String::new("http://api.worldweatheronline.com/free/v2/weather.ashx");
-    end_point.push_str(get_api_key().ok().expect("api file not found"));
-    end_point.push_str(get_ip_address().ok().expect("ip address not found"));
-    end_point.push_str("&num_of_days=0&format=json");
+    let host = "ipinfo.io";
+    let mut stream = try!(TcpStream::connect((host, 80)));
+    let header = format!("GET /ip HTTP/1.0\r\nHost: {}\r\n\r\n", host);
+    try!(stream.write(header.as_bytes()));
+    let mut s = String::new();
+    try!(stream.read_to_string(&mut s));
+    match s.split("\r\n\r\n").nth(1) { // response body is the external ip
+        Some(m) => Ok(m.trim().to_owned()),
+        None => Err(Error::new(ErrorKind::Other, "ip addr not found"))
+    }
 }
 
 fn main() {
-    println!("{}", get_api_key().ok().expect("api file not found"));
+    println!("{}", get_ip_address().unwrap());
 }
