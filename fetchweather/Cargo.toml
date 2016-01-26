@@ -1,0 +1,7 @@
+[package]
+name = "fetchweather"
+version = "0.1.0"
+authors = ["Humberto Pinheiro <humbhenri@gmail.com>"]
+
+[dependencies]
+curl = "0.2.16"
