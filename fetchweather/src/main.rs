@@ -3,6 +3,17 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::net::TcpStream;
 use std::io::{Error, ErrorKind};
+extern crate rustc_serialize;
+use rustc_serialize::json;
+
+#[derive(RustcDecodable, Debug)]
+struct Weather {
+    weather: String,
+    // temp: i32,
+    // wind: i32,
+    // humidity: i32,
+    // precipitation: i32
+}
 
 fn get_api_key() -> Result<String, io::Error> {
     let mut f = try!(File::open("apikey"));
@@ -22,7 +33,6 @@ fn get_body_http_request(host: &str, header: &str) -> Result<String, io::Error> 
         Some(m) => Ok(m.trim().to_owned()),
         None => Err(Error::new(ErrorKind::Other, "ip addr not found"))
     }
-
 }
 
 fn get_ip_address() -> Result<String, io::Error> {
@@ -32,13 +42,19 @@ fn get_ip_address() -> Result<String, io::Error> {
     Ok(s)
 }
 
+fn parse_json(data: &str) -> Weather {
+    let json = json::decode(data).unwrap();
+    json
+}
+
 fn get_weather() -> Result<String, io::Error> {
     let host = "api.worldweatheronline.com";
-    let header = format!("/free/v2/weather.ashx?key={}&q={}&num_of_days=0&format=json", try!(get_api_key()), try!(get_ip_address()));
+    let header = format!("/free/v2/weather.ashx?key={}&q={}&num_of_days=0&format=csv", try!(get_api_key()), try!(get_ip_address()));
     let s = try!(get_body_http_request(host, &header));
     Ok(s)
 }
 
 fn main() {
-    println!("{}", get_weather().unwrap());
+    let weather = get_weather().unwrap();
+    println!("{:?}", weather);
 }
